@@ -4,12 +4,14 @@ import random
 import time
 
 # Define pygame constants for the window size and frames per second
-HEIGHT = 1000
-WIDTH = 1000
-FPS = 500
+HEIGHT = 1250
+WIDTH = 1250
+FPS = 1000
 
-maze_size = 100
+maze_size = 125
 cell_size = HEIGHT // maze_size
+
+thickness = 3
 
 graphics_enabled = True
 
@@ -44,17 +46,17 @@ def update_walls(cell: Cell, screen: pygame.Surface):
     the wall is erased."""
 
     if not cell.walls['N']:
-        pygame.draw.line(screen, (255, 255, 255), (cell.col * cell_size, cell.row * cell_size),
-                         ((cell.col + 1) * cell_size, cell.row * cell_size))
+        pygame.draw.line(screen, (51, 204, 51), (cell.col * cell_size, cell.row * cell_size),
+                         ((cell.col + 1) * cell_size, cell.row * cell_size), thickness)
     if not cell.walls['E']:
-        pygame.draw.line(screen, (255, 255, 255), ((cell.col + 1) * cell_size, cell.row * cell_size),
-                         ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size))
+        pygame.draw.line(screen, (51, 204, 51), ((cell.col + 1) * cell_size, cell.row * cell_size),
+                         ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size), thickness)
     if not cell.walls['S']:
-        pygame.draw.line(screen, (255, 255, 255), ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size),
-                         (cell.col * cell_size, (cell.row + 1) * cell_size))
+        pygame.draw.line(screen, (51, 204, 51), ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size),
+                         (cell.col * cell_size, (cell.row + 1) * cell_size), thickness)
     if not cell.walls['W']:
-        pygame.draw.line(screen, (255, 255, 255), (cell.col * cell_size, (cell.row + 1) * cell_size),
-                         (cell.col * cell_size, cell.row * cell_size))
+        pygame.draw.line(screen, (51, 204, 51), (cell.col * cell_size, (cell.row + 1) * cell_size),
+                         (cell.col * cell_size, cell.row * cell_size), thickness)
     pygame.display.flip()
 
 
@@ -85,16 +87,16 @@ class Maze:
             for cell in row:
                 if cell.walls['N']:
                     pygame.draw.line(screen, (0, 0, 0), (cell.col * cell_size, cell.row * cell_size),
-                                     ((cell.col + 1) * cell_size, cell.row * cell_size))
+                                     ((cell.col + 1) * cell_size, cell.row * cell_size), thickness)
                 if cell.walls['E']:
                     pygame.draw.line(screen, (0, 0, 0), ((cell.col + 1) * cell_size, cell.row * cell_size),
-                                     ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size))
+                                     ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size), thickness)
                 if cell.walls['S']:
                     pygame.draw.line(screen, (0, 0, 0), ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size),
-                                     (cell.col * cell_size, (cell.row + 1) * cell_size))
+                                     (cell.col * cell_size, (cell.row + 1) * cell_size), thickness)
                 if cell.walls['W']:
                     pygame.draw.line(screen, (0, 0, 0), (cell.col * cell_size, (cell.row + 1) * cell_size),
-                                     (cell.col * cell_size, cell.row * cell_size))
+                                     (cell.col * cell_size, cell.row * cell_size), thickness)
         pygame.display.flip()
 
 
@@ -247,10 +249,10 @@ def main():
         clock = pygame.time.Clock()
         screen.fill((255, 255, 255))
         maze.draw_maze(screen)
+        maze_generator.draw_agent(screen)
         pygame.display.flip()
-
+        time.sleep(2)
         # Generate maze step by step
-        maze_generator.generate_maze_step(screen)
 
         running = True
         while running:
