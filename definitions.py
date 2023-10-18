@@ -3,13 +3,11 @@ import pygame
 import random
 import time
 
-# Define pygame constants for the window size and frames per second
-HEIGHT = 1250
-WIDTH = 1250
-FPS = 1000
 
-maze_size = 125
-cell_size = HEIGHT // maze_size
+# Define pygame constants for the window size and frames per second
+HEIGHT = 1000
+WIDTH = 1000
+FPS = 1000
 
 thickness = 3
 
@@ -34,32 +32,6 @@ class Cell:
         print(f'Cell({self.row}, {self.col}) walls: {self.walls}')
 
 
-def fill_cell(color: tuple, screen: pygame.Surface, cell: Cell):
-    """Draws a rectangle in the cell to fill it in, and """
-    pygame.draw.rect(screen, color, ((cell.col * cell_size) + 1, (cell.row * cell_size) + 1,
-                                     cell_size - 2, cell_size - 2))
-    pygame.display.flip()
-
-
-def update_walls(cell: Cell, screen: pygame.Surface):
-    """Updates the maze by checking the walls of the cell. If the cell wall is marked as False,
-    the wall is erased."""
-
-    if not cell.walls['N']:
-        pygame.draw.line(screen, (51, 204, 51), (cell.col * cell_size, cell.row * cell_size),
-                         ((cell.col + 1) * cell_size, cell.row * cell_size), thickness)
-    if not cell.walls['E']:
-        pygame.draw.line(screen, (51, 204, 51), ((cell.col + 1) * cell_size, cell.row * cell_size),
-                         ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size), thickness)
-    if not cell.walls['S']:
-        pygame.draw.line(screen, (51, 204, 51), ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size),
-                         (cell.col * cell_size, (cell.row + 1) * cell_size), thickness)
-    if not cell.walls['W']:
-        pygame.draw.line(screen, (51, 204, 51), (cell.col * cell_size, (cell.row + 1) * cell_size),
-                         (cell.col * cell_size, cell.row * cell_size), thickness)
-    pygame.display.flip()
-
-
 class Maze:
     """This represents the overall maze, which is a grid of cells."""
 
@@ -67,6 +39,7 @@ class Maze:
         self.size = size
         # cells are stored as a list of lists, with each inner list representing a row. Walls are up by default.
         self.cells = [[Cell(row, col) for col in range(size)] for row in range(size)]
+        self.cell_size = HEIGHT // size
 
     def __repr__(self):
         return f'Maze({self.size})'
@@ -77,6 +50,31 @@ class Maze:
         for row in self.cells:
             print(row)
 
+    def fill_cell(self, color: tuple, screen: pygame.Surface, cell: Cell):
+        """Draws a rectangle in the cell to fill it in, and """
+        pygame.draw.rect(screen, color, ((cell.col * self.cell_size) + 1, (cell.row * self.cell_size) + 1,
+                                         self.cell_size - 2, self.cell_size - 2))
+        pygame.display.flip()
+
+    def update_walls(self, cell: Cell, screen: pygame.Surface):
+        """Updates the maze by checking the walls of the cell. If the cell wall is marked as False,
+            the wall is erased."""
+        if graphics_enabled:
+            if not cell.walls['N']:
+                pygame.draw.line(screen, (51, 204, 51), (cell.col * self.cell_size, cell.row * self.cell_size),
+                                 ((cell.col + 1) * self.cell_size, cell.row * self.cell_size), thickness)
+            if not cell.walls['E']:
+                pygame.draw.line(screen, (51, 204, 51), ((cell.col + 1) * self.cell_size, cell.row * self.cell_size),
+                                 ((cell.col + 1) * self.cell_size, (cell.row + 1) * self.cell_size), thickness)
+            if not cell.walls['S']:
+                pygame.draw.line(screen, (51, 204, 51),
+                                 ((cell.col + 1) * self.cell_size, (cell.row + 1) * self.cell_size),
+                                 (cell.col * self.cell_size, (cell.row + 1) * self.cell_size), thickness)
+            if not cell.walls['W']:
+                pygame.draw.line(screen, (51, 204, 51), (cell.col * self.cell_size, (cell.row + 1) * self.cell_size),
+                                 (cell.col * self.cell_size, cell.row * self.cell_size), thickness)
+            pygame.display.flip()
+
     def draw_maze(self, screen: pygame.Surface):
         """Draws the initial grid for the maze using pygame. Cell borders are drawn where walls are up.
         Also used to clear the maze generator."""
@@ -86,17 +84,18 @@ class Maze:
         for row in self.cells:
             for cell in row:
                 if cell.walls['N']:
-                    pygame.draw.line(screen, (0, 0, 0), (cell.col * cell_size, cell.row * cell_size),
-                                     ((cell.col + 1) * cell_size, cell.row * cell_size), thickness)
+                    pygame.draw.line(screen, (0, 0, 0), (cell.col * self.cell_size, cell.row * self.cell_size),
+                                     ((cell.col + 1) * self.cell_size, cell.row * self.cell_size), thickness)
                 if cell.walls['E']:
-                    pygame.draw.line(screen, (0, 0, 0), ((cell.col + 1) * cell_size, cell.row * cell_size),
-                                     ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size), thickness)
+                    pygame.draw.line(screen, (0, 0, 0), ((cell.col + 1) * self.cell_size, cell.row * self.cell_size),
+                                     ((cell.col + 1) * self.cell_size, (cell.row + 1) * self.cell_size), thickness)
                 if cell.walls['S']:
-                    pygame.draw.line(screen, (0, 0, 0), ((cell.col + 1) * cell_size, (cell.row + 1) * cell_size),
-                                     (cell.col * cell_size, (cell.row + 1) * cell_size), thickness)
+                    pygame.draw.line(screen, (0, 0, 0),
+                                     ((cell.col + 1) * self.cell_size, (cell.row + 1) * self.cell_size),
+                                     (cell.col * self.cell_size, (cell.row + 1) * self.cell_size), thickness)
                 if cell.walls['W']:
-                    pygame.draw.line(screen, (0, 0, 0), (cell.col * cell_size, (cell.row + 1) * cell_size),
-                                     (cell.col * cell_size, cell.row * cell_size), thickness)
+                    pygame.draw.line(screen, (0, 0, 0), (cell.col * self.cell_size, (cell.row + 1) * self.cell_size),
+                                     (cell.col * self.cell_size, cell.row * self.cell_size), thickness)
         pygame.display.flip()
 
 
@@ -109,7 +108,7 @@ class Agent:
         self.maze = maze
         self.row = starting_row
         self.col = starting_col
-        self.size = cell_size - 2
+        self.size = maze.cell_size - 2
         self.color = color
         self.trail_color = trail_color
         self.current_cell = self.maze.cells[self.row][self.col]
@@ -123,8 +122,9 @@ class Agent:
 
     def draw_agent(self, screen: pygame.Surface):
         """Draws the agent on the maze, centered in the cell."""
-        pygame.draw.rect(screen, self.color, ((self.col * cell_size) + 1, (self.row * cell_size) + 1,
-                                              self.size, self.size))
+        pygame.draw.rect(screen, self.color,
+                         ((self.col * self.maze.cell_size) + 1, (self.row * self.maze.cell_size) + 1,
+                          self.size, self.size))
         # pygame.display.flip()
 
     def move(self, direction: str, screen: pygame.Surface):
@@ -133,8 +133,9 @@ class Agent:
         #
         if graphics_enabled:
             # color in the current spot with the trail color, same size as the agent
-            pygame.draw.rect(screen, self.trail_color, ((self.col * cell_size) + 1, (self.row * cell_size) + 1,
-                                                        self.size, self.size))
+            pygame.draw.rect(screen, self.trail_color,
+                             ((self.col * self.maze.cell_size) + 1, (self.row * self.maze.cell_size) + 1,
+                              self.size, self.size))
         if direction == 'N' and not self.maze.cells[self.row][self.col].walls['N']:
             if self.row > 0:
                 self.row -= 1
@@ -156,6 +157,17 @@ class Agent:
             self.draw_agent(screen)
 
 
+def generate_maze(size, screen: pygame.Surface = None):
+    maze = Maze(size)
+    maze_generator = MazeGenerator(maze)
+    while not maze_generator.done:
+        maze_generator.generate_maze_step(screen)  # Pass None for the screen if we're not displaying
+        if screen is not None:
+            pygame.display.flip()
+
+    return maze
+
+
 class MazeGenerator(Agent):
     def __init__(self, maze: Maze):
         super().__init__(maze)
@@ -169,7 +181,7 @@ class MazeGenerator(Agent):
         if len(self.stack) > 0:
             # Pop the current cell from the stack
             self.current_cell = self.stack.pop()
-            # If current cell has unvisited neighbors, push it back to the stack
+
             # draw agent on current cell
             self.row = self.current_cell.row
             self.col = self.current_cell.col
@@ -182,7 +194,7 @@ class MazeGenerator(Agent):
                 neighbors.append(self.maze.cells[self.current_cell.row + 1][self.current_cell.col])
             if self.current_cell.col > 0:
                 neighbors.append(self.maze.cells[self.current_cell.row][self.current_cell.col - 1])
-
+            # If current cell has unvisited neighbors, push it back to the stack
             if not all(neighbor.visited for neighbor in neighbors):
                 self.stack.append(self.current_cell)
 
@@ -195,8 +207,8 @@ class MazeGenerator(Agent):
                         neighbor_cell.walls['S'] = False
                         neighbor_cell.visited = True
                         self.stack.append(neighbor_cell)
-                        update_walls(self.current_cell, screen)
-                        update_walls(neighbor_cell, screen)
+                        self.maze.update_walls(self.current_cell, screen)
+                        self.maze.update_walls(neighbor_cell, screen)
                         self.move(direction, screen)
             elif direction == 'E':
                 if self.current_cell.col < self.maze.size - 1:
@@ -206,8 +218,8 @@ class MazeGenerator(Agent):
                         neighbor_cell.walls['W'] = False
                         neighbor_cell.visited = True
                         self.stack.append(neighbor_cell)
-                        update_walls(self.current_cell, screen)
-                        update_walls(neighbor_cell, screen)
+                        self.maze.update_walls(self.current_cell, screen)
+                        self.maze.update_walls(neighbor_cell, screen)
                         self.move(direction, screen)
             elif direction == 'S':
                 if self.current_cell.row < self.maze.size - 1:
@@ -217,8 +229,8 @@ class MazeGenerator(Agent):
                         neighbor_cell.walls['N'] = False
                         neighbor_cell.visited = True
                         self.stack.append(neighbor_cell)
-                        update_walls(self.current_cell, screen)
-                        update_walls(neighbor_cell, screen)
+                        self.maze.update_walls(self.current_cell, screen)
+                        self.maze.update_walls(neighbor_cell, screen)
                         self.move(direction, screen)
             elif direction == 'W':
                 if self.current_cell.col > 0:
@@ -228,8 +240,8 @@ class MazeGenerator(Agent):
                         neighbor_cell.walls['E'] = False
                         neighbor_cell.visited = True
                         self.stack.append(neighbor_cell)
-                        update_walls(self.current_cell, screen)
-                        update_walls(neighbor_cell, screen)
+                        self.maze.update_walls(self.current_cell, screen)
+                        self.maze.update_walls(neighbor_cell, screen)
                         self.move(direction, screen)
         else:
             # No unvisited neighbors, maze generation is complete
@@ -239,7 +251,7 @@ class MazeGenerator(Agent):
 def main():
     """This is the main function for the maze generator and solver."""
     print('This is a module for a maze generator and solver.')
-    maze = Maze(maze_size)
+    maze = Maze(100)
     maze_generator = MazeGenerator(maze)
 
     if graphics_enabled:
