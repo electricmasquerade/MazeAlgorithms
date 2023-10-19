@@ -3,7 +3,6 @@ import pygame
 import random
 import time
 
-
 # Define pygame constants for the window size and frames per second
 HEIGHT = 1000
 WIDTH = 1000
@@ -157,11 +156,11 @@ class Agent:
             self.draw_agent(screen)
 
 
-def generate_maze(size, screen: pygame.Surface = None):
+def generate_maze(size, algorithm, screen: pygame.Surface = None):
     maze = Maze(size)
     maze_generator = MazeGenerator(maze)
     while not maze_generator.done:
-        maze_generator.generate_maze_step(screen)  # Pass None for the screen if we're not displaying
+        maze_generator.algorithms[algorithm](screen)  # Pass None for the screen if we're not displaying
         if screen is not None:
             pygame.display.flip()
 
@@ -169,20 +168,24 @@ def generate_maze(size, screen: pygame.Surface = None):
 
 
 class MazeGenerator(Agent):
-    def __init__(self, maze: Maze):
-        super().__init__(maze)
+    """This is the maze generator class, a superclass of the Agent class. It contains all the maze generation
+    algorithms."""
+
+    def __init__(self, maze: Maze, color: tuple = (255, 0, 0), trail_color: tuple = (0, 255, 0)):
+        super().__init__(maze, color=color, trail_color=trail_color)
         self.current_cell.visited = True
         self.stack = []
         self.stack.append(self.current_cell)
         self.done = False
+        self.algorithms = {'depth_first': self.generate_maze_depth_first_step}
 
-    def generate_maze_step(self, screen: pygame.Surface):
+    def generate_maze_depth_first_step(self, screen: pygame.Surface):
         """Generate one step of the maze using iterative backtracking (randomized depth-first)."""
         if len(self.stack) > 0:
             # Pop the current cell from the stack
             self.current_cell = self.stack.pop()
 
-            # draw agent on current cell
+            # place agent on current cell
             self.row = self.current_cell.row
             self.col = self.current_cell.col
             neighbors = []
@@ -248,10 +251,33 @@ class MazeGenerator(Agent):
             self.done = True
 
 
+class MazeSolver(Agent):
+    def __init__(self, maze: Maze, target_cell: Cell, color: tuple = (0, 0, 255), trail_color: tuple = (0, 255, 0)):
+        super().__init__(maze, color=color, trail_color=trail_color)
+        self.current_cell.visited = True
+        self.stack = []
+        self.stack.append(self.current_cell)
+        self.done = False
+        self.algorithms = {'depth_first': self.depth_first_step, 'breadth_first': self.breadth_first_step(),
+                           'a_star': self.a_star_step}
+        self.target_cell = target_cell
+
+    def depth_first_step(self, screen: pygame.Surface):
+        """One step of the maze solver algorithm using depth first search."""
+        pass
+
+    def breadth_first_step(self):
+        """One step of the maze solver algorithm using breadth first search."""
+        pass
+
+    def a_star_step(self):
+        pass
+
+
 def main():
-    """This is the main function for the maze generator and solver."""
+    """This animates the maze being generated. Useful for testing/visualizing the maze generation algorithm."""
     print('This is a module for a maze generator and solver.')
-    maze = Maze(100)
+    maze = Maze(20)
     maze_generator = MazeGenerator(maze)
 
     if graphics_enabled:
@@ -278,7 +304,7 @@ def main():
 
             # Generate one step of the maze and update the display
             if not maze_generator.done:
-                maze_generator.generate_maze_step(screen)
+                maze_generator.generate_maze_depth_first_step(screen)
                 pygame.display.flip()
             else:
                 maze.draw_maze(screen)
